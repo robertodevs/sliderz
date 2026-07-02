@@ -1,0 +1,11 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+- Write self-documenting code instead of comments when possible
+- Comments should explain WHY, not WHAT
+- Remove commented-out code
+- Use TODO comments sparingly and track them
+- Avoid redundant comments that just repeat the code
+- Keep comments close to the code they describe

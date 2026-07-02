@@ -1,0 +1,23 @@
+PODS:
+  - Flutter (1.0.0)
+  - flutter_midi_command_darwin (1.0.0):
+    - Flutter
+    - FlutterMacOS
+
+DEPENDENCIES:
+  - Flutter (from `Flutter`)
+  - flutter_midi_command_darwin (from `.symlinks/plugins/flutter_midi_command_darwin/darwin`)
+
+EXTERNAL SOURCES:
+  Flutter:
+    :path: Flutter
+  flutter_midi_command_darwin:
+    :path: ".symlinks/plugins/flutter_midi_command_darwin/darwin"
+
+SPEC CHECKSUMS:
+  Flutter: cabc95a1d2626b1b06e7179b784ebcf0c0cde467
+  flutter_midi_command_darwin: 6afc0c0eb03f1a60a8a1704240e3bcfe68b76a51
+
+PODFILE CHECKSUM: 203d88b683a70b4194043435db82838ed9bd9257
+
+COCOAPODS: 1.16.2

@@ -1,0 +1,10 @@
+---
+alwaysApply: true
+---
+- Leave code cleaner than you found it (Boy Scout Rule)
+- Refactor continuously
+- Remove dead code immediately
+- Use meaningful variable and function names
+- Avoid deep nesting (max 3 levels)
+- Follow the principle of least astonishment
+- Be consistent with naming conventions and patterns

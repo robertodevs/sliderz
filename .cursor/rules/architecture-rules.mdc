@@ -1,0 +1,15 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+- Separate concerns: UI, Business Logic (Blocs), and Data (Services)
+- Keep widgets stateless when possible
+- Use StreamBuilder for reactive UI updates
+- Keep business logic out of UI widgets
+- Use dependency injection properly (via your Injector)
+- Follow feature-first folder organization
+- Create small, reusable components
+- **Widget files:** Prefer **one main widget per file** for anything non-trivial. Extract UI building blocks (e.g. overlays, cards, map layers) into **`lib/<feature>/components/<descriptive_name>.dart`** with a **public** widget class instead of **`_PrivateWidget`** helpers at the bottom of a screen file. Reserve private classes in the same file only for tiny, strictly local helpers (e.g. a single `const` row or divider).
+- **Feature UI paths:** put shared UI for a feature under `lib/<feature>/components/` (same pattern as `lib/common/components/`, `lib/orders/components/`). **Do not** use a `widgets/` folder name for feature-level UI—use **`components`** so imports stay consistent (`package:linea_express/<feature>/components/...`).
+- For holdable UI state models, prefer `class MyModel with ChangeNotifier` (mutate fields + `notifyListeners()`) over `ValueNotifier<MyModel>`. Listen with `ListenableBuilder`, `AnimatedBuilder`, or `Listenable.merge`—see Flutter’s [listenable_builder](https://api.flutter.dev/flutter/widgets/ListenableBuilder-class.html) samples. Reserve `ValueNotifier` for simple values (e.g. a single loading flag) when a full model is unnecessary.

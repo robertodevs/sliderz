@@ -1,0 +1,12 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+- Use intention-revealing names: prefer `userAuthenticationBloc` over `authBloc`
+- Use searchable names: avoid single-letter variables except for loop counters
+- Use pronounceable names: prefer `createdAt` over `crtdAt`
+- Use verbs for functions, nouns for classes: `calculateTotal()` vs `Calculator`
+- Avoid mental mapping: use `users` instead of `list` or `items`
+- Class names should be nouns: `UserProfile`, `AudioSermon`
+- Method names should be verbs: `getUserProfile()`, `playAudio()`

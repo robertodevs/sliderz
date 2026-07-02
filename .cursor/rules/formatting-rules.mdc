@@ -1,0 +1,11 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+- Use consistent indentation (2 spaces for Dart)
+- Keep lines under 80-120 characters
+- Use vertical spacing to separate logical groups
+- Order imports: dart core, dart libraries, third-party packages, relative imports
+- Group related variables and functions together
+- Put dependent functions close to each other

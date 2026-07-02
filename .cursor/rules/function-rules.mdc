@@ -1,0 +1,13 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+- Functions should be small (max 20 lines)
+- Functions should do one thing only
+- Functions should have no more than 3 parameters
+- Use descriptive function names that explain what they do
+- Avoid flag arguments (boolean parameters that change behavior)
+- Prefer command-query separation: functions either do something or return something, not both
+- Extract try-catch blocks into separate functions
+- Don't repeat yourself (DRY principle)
