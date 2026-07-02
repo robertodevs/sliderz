@@ -54,8 +54,8 @@ flutter_launcher_icons:
 
 flutter_native_splash:
   color: "#080C12"
-  image: assets/splash_landscape.png
-  image_ios: assets/splash_landscape.png
+  image: assets/splash_landscape_hires.png
+  image_ios: assets/splash_landscape_hires.png
   fullscreen: true
   ios_content_mode: scaleAspectFill
   android_gravity: fill
