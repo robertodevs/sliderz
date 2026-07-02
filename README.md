@@ -2,6 +2,8 @@
 
 A Flutter MIDI controller for iPhone and iPad, inspired by the KORG nanoKONTROL2. Control faders, knobs, transport, and channel buttons from your iOS device — including over Wi‑Fi to a Mac running MainStage or another DAW.
 
+![Sliderz UI](assets/screenshot.png)
+
 ## Features
 
 - **8 color-coded channel strips** — fader, pan knob, and Solo / Mute / Record buttons per channel
