@@ -8,7 +8,7 @@ import 'package:sliderz/theme/app_theme.dart';
 class MidiButton extends StatefulWidget {
   const MidiButton({
     super.key,
-    required this.label,
+    this.label = '',
     this.onPressed,
     this.onReleased,
     this.onTap,

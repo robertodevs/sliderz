@@ -36,6 +36,8 @@ class _NavigationSection extends StatelessWidget {
 
   final ValueChanged<int> onTransport;
 
+  static const _arrowButtonSize = AppTouch.transportButton;
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -47,16 +49,16 @@ class _NavigationSection extends StatelessWidget {
         Row(
           children: [
             MidiButton(
-              label: '◀',
-              size: AppTouch.transportButton,
+              icon: Icons.chevron_left,
+              size: _arrowButtonSize,
               glowWhenActive: false,
               onPressed: () => onTransport(NanoKontrol2Mapping.trackLeft),
               onReleased: () {},
             ),
             const SizedBox(width: 4),
             MidiButton(
-              label: '▶',
-              size: AppTouch.transportButton,
+              icon: Icons.chevron_right,
+              size: _arrowButtonSize,
               glowWhenActive: false,
               onPressed: () => onTransport(NanoKontrol2Mapping.trackRight),
               onReleased: () {},
@@ -72,21 +74,21 @@ class _NavigationSection extends StatelessWidget {
           children: [
             MidiButton(
               label: 'SET',
-              size: AppTouch.transportButton,
+              size: _arrowButtonSize,
               accentColor: AppColors.accent,
               onPressed: () => onTransport(NanoKontrol2Mapping.markerSet),
               onReleased: () {},
             ),
             MidiButton(
-              label: '◀',
-              size: AppTouch.transportButton,
+              icon: Icons.chevron_left,
+              size: _arrowButtonSize,
               glowWhenActive: false,
               onPressed: () => onTransport(NanoKontrol2Mapping.markerLeft),
               onReleased: () {},
             ),
             MidiButton(
-              label: '▶',
-              size: AppTouch.transportButton,
+              icon: Icons.chevron_right,
+              size: _arrowButtonSize,
               glowWhenActive: false,
               onPressed: () => onTransport(NanoKontrol2Mapping.markerRight),
               onReleased: () {},
@@ -97,8 +99,8 @@ class _NavigationSection extends StatelessWidget {
         Text('CYCLE', style: Theme.of(context).textTheme.labelSmall),
         const SizedBox(height: 6),
         MidiButton(
-          label: '↻',
-          size: AppTouch.transportButton,
+          icon: Icons.loop,
+          size: _arrowButtonSize,
           glowWhenActive: false,
           onPressed: () => onTransport(NanoKontrol2Mapping.cycle),
           onReleased: () {},
@@ -113,6 +115,8 @@ class _TransportSection extends StatelessWidget {
 
   final ValueChanged<int> onTransport;
 
+  static const _transportButtonSize = AppTouch.transportButton;
+
   @override
   Widget build(BuildContext context) {
     return Wrap(
@@ -120,36 +124,36 @@ class _TransportSection extends StatelessWidget {
       runSpacing: 4,
       children: [
         MidiButton(
-          label: '⏮',
-          size: AppTouch.transportButton,
+          icon: Icons.fast_rewind,
+          size: _transportButtonSize,
           glowWhenActive: false,
           onPressed: () => onTransport(NanoKontrol2Mapping.rewind),
           onReleased: () {},
         ),
         MidiButton(
-          label: '⏭',
-          size: AppTouch.transportButton,
+          icon: Icons.fast_forward,
+          size: _transportButtonSize,
           glowWhenActive: false,
           onPressed: () => onTransport(NanoKontrol2Mapping.fastForward),
           onReleased: () {},
         ),
         MidiButton(
-          label: '⏹',
-          size: AppTouch.transportButton,
+          icon: Icons.stop,
+          size: _transportButtonSize,
           glowWhenActive: false,
           onPressed: () => onTransport(NanoKontrol2Mapping.stop),
           onReleased: () {},
         ),
         MidiButton(
-          label: '▶',
-          size: AppTouch.transportButton,
+          icon: Icons.play_arrow,
+          size: _transportButtonSize,
           glowWhenActive: false,
           onPressed: () => onTransport(NanoKontrol2Mapping.play),
           onReleased: () {},
         ),
         MidiButton(
-          label: '●',
-          size: AppTouch.transportButton,
+          icon: Icons.fiber_manual_record,
+          size: _transportButtonSize,
           accentColor: const Color(0xFFEF4444),
           onPressed: () => onTransport(NanoKontrol2Mapping.recordTransport),
           onReleased: () {},
