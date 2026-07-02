@@ -48,8 +48,8 @@ class _StatusIndicators extends StatelessWidget {
             icon: networkOn ? Icons.wifi : Icons.wifi_off,
             color: networkOn ? AppColors.success : AppColors.label,
             label: networkOn
-                ? 'Wi‑Fi conectado con MainStage'
-                : 'Wi‑Fi desactivado',
+                ? 'MIDI por red activo'
+                : 'MIDI por red desactivado',
           ),
         ],
       ],

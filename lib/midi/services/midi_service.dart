@@ -5,8 +5,10 @@ import 'package:flutter_midi_command/flutter_midi_command.dart';
 
 class MidiService extends ChangeNotifier {
   MidiService() {
-    _init();
+    unawaited(_init());
   }
+
+  static const String virtualDeviceName = 'Sliderz';
 
   final MidiCommand _midi = MidiCommand();
   bool _ready = false;
@@ -14,6 +16,7 @@ class MidiService extends ChangeNotifier {
   int _channel = 0;
   bool _networkSupported = false;
   bool _networkEnabled = false;
+  bool _virtualConnected = false;
   StreamSubscription<MidiSetupChange>? _setupSubscription;
 
   bool get isReady => _ready;
@@ -21,12 +24,20 @@ class MidiService extends ChangeNotifier {
   int get channel => _channel;
   bool get networkSupported => _networkSupported;
   bool get networkEnabled => _networkEnabled;
+  bool get virtualConnected => _virtualConnected;
 
   Future<void> _init() async {
     try {
-      _midi.addVirtualDevice(name: 'Sliderz');
+      _midi.addVirtualDevice(name: virtualDeviceName);
+      await _connectVirtualDevice();
       await _loadNetworkState();
+      if (_networkSupported && !_networkEnabled) {
+        await setNetworkEnabled(true);
+      }
       _setupSubscription = _midi.onMidiSetupChanged?.listen((_) {
+        if (!_virtualConnected) {
+          unawaited(_connectVirtualDevice());
+        }
         notifyListeners();
       });
       _ready = true;
@@ -36,6 +47,31 @@ class MidiService extends ChangeNotifier {
       _error = e.toString();
     }
     notifyListeners();
+  }
+
+  Future<void> _connectVirtualDevice() async {
+    try {
+      final devices = await _midi.devices ?? const <MidiDevice>[];
+      for (final device in devices) {
+        if (device.name != virtualDeviceName ||
+            device.type != MidiDeviceType.ownVirtual) {
+          continue;
+        }
+        if (!device.connected) {
+          await _midi.connectToDevice(device);
+        }
+        _virtualConnected = true;
+        if (kDebugMode) {
+          debugPrint('MIDI virtual port "$virtualDeviceName" connected');
+        }
+        return;
+      }
+    } catch (e) {
+      _virtualConnected = false;
+      if (kDebugMode) {
+        debugPrint('MIDI virtual port connect failed: $e');
+      }
+    }
   }
 
   Future<void> _loadNetworkState() async {
@@ -92,6 +128,11 @@ class MidiService extends ChangeNotifier {
 
   void sendCc(int cc, int value) {
     if (!_ready) return;
+    if (!_virtualConnected && kDebugMode) {
+      debugPrint(
+        'MIDI warning: virtual port not connected — message may not be sent',
+      );
+    }
     final clamped = value.clamp(0, 127);
     if (kDebugMode) {
       debugPrint(
@@ -118,7 +159,7 @@ class MidiService extends ChangeNotifier {
       } catch (_) {}
     }
     try {
-      _midi.removeVirtualDevice(name: 'Sliderz');
+      _midi.removeVirtualDevice(name: virtualDeviceName);
     } catch (_) {}
     super.dispose();
   }

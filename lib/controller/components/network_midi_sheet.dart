@@ -25,64 +25,84 @@ class NetworkMidiSheet extends StatelessWidget {
     return ListenableBuilder(
       listenable: midiService,
       builder: (context, child) {
+        final maxHeight = MediaQuery.sizeOf(context).height * 0.88;
+
         return SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Row(
-                  children: [
-                    const Icon(Icons.wifi, color: AppColors.accent),
-                    const SizedBox(width: 8),
-                    Text(
-                      'MIDI por red (Wi‑Fi)',
-                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                            color: AppColors.labelBright,
-                            fontWeight: FontWeight.w700,
-                          ),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(maxHeight: maxHeight),
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Center(
+                    child: Container(
+                      width: 36,
+                      height: 4,
+                      margin: const EdgeInsets.only(bottom: 12),
+                      decoration: BoxDecoration(
+                        color: AppColors.border,
+                        borderRadius: BorderRadius.circular(2),
+                      ),
                     ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                if (!midiService.networkSupported)
-                  Text(
-                    'MIDI por red solo está disponible en iOS y macOS.',
-                    style: Theme.of(context).textTheme.labelSmall,
-                  )
-                else ...[
-                  SwitchListTile(
-                    contentPadding: EdgeInsets.zero,
-                    title: const Text(
-                      'Enviar MIDI por Wi‑Fi',
-                      style: TextStyle(color: AppColors.labelBright, fontSize: 14),
-                    ),
-                    subtitle: Text(
-                      midiService.networkEnabled
-                          ? 'Activo — tu Mac puede recibir los controles'
-                          : 'Desactivado — solo MIDI local en este dispositivo',
-                      style: Theme.of(context).textTheme.labelSmall,
-                    ),
-                    value: midiService.networkEnabled,
-                    activeThumbColor: AppColors.accent,
-                    onChanged: (enabled) =>
-                        midiService.setNetworkEnabled(enabled),
                   ),
-                  if (midiService.error != null) ...[
-                    const SizedBox(height: 8),
-                    Text(
-                      midiService.error!,
-                      style: Theme.of(context)
-                          .textTheme
-                          .labelSmall
-                          ?.copyWith(color: const Color(0xFFEF4444)),
-                    ),
-                  ],
+                  Row(
+                    children: [
+                      const Icon(Icons.cable, color: AppColors.accent),
+                      const SizedBox(width: 8),
+                      Text(
+                        'Conexión con MainStage',
+                        style:
+                            Theme.of(context).textTheme.titleSmall?.copyWith(
+                                  color: AppColors.labelBright,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                      ),
+                    ],
+                  ),
                   const SizedBox(height: 12),
-                  const _SetupSteps(),
+                  if (!midiService.networkSupported)
+                    Text(
+                      'MIDI por red solo está disponible en iOS y macOS.',
+                      style: Theme.of(context).textTheme.labelSmall,
+                    )
+                  else ...[
+                    SwitchListTile(
+                      contentPadding: EdgeInsets.zero,
+                      title: const Text(
+                        'MIDI por red (Wi‑Fi)',
+                        style: TextStyle(
+                          color: AppColors.labelBright,
+                          fontSize: 14,
+                        ),
+                      ),
+                      subtitle: Text(
+                        midiService.networkEnabled
+                            ? 'Activo — útil si no usas USB o como respaldo'
+                            : 'Desactivado — USB puede seguir funcionando',
+                        style: Theme.of(context).textTheme.labelSmall,
+                      ),
+                      value: midiService.networkEnabled,
+                      activeThumbColor: AppColors.accent,
+                      onChanged: (enabled) =>
+                          midiService.setNetworkEnabled(enabled),
+                    ),
+                    if (midiService.error != null) ...[
+                      const SizedBox(height: 8),
+                      Text(
+                        midiService.error!,
+                        style: Theme.of(context)
+                            .textTheme
+                            .labelSmall
+                            ?.copyWith(color: const Color(0xFFEF4444)),
+                      ),
+                    ],
+                    const SizedBox(height: 12),
+                    const _SetupSteps(),
+                  ],
                 ],
-              ],
+              ),
             ),
           ),
         );
@@ -103,7 +123,7 @@ class _SetupSteps extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Configurar en tu Mac (MainStage)',
+            'Opción A — USB (recomendado)',
             style: Theme.of(context).textTheme.labelSmall?.copyWith(
                   fontWeight: FontWeight.w700,
                   color: AppColors.labelBright,
@@ -114,22 +134,47 @@ class _SetupSteps extends StatelessWidget {
           const _Step(
             number: '1',
             text:
-                'Mac e iPhone/iPad en la misma red Wi‑Fi. Activa MIDI por red aquí.',
+                'Conecta el iPhone al Mac por USB y pulsa Confiar en el iPhone.',
           ),
           const _Step(
             number: '2',
             text:
-                'Abre Configuración de Audio y MIDI → Ventana → Mostrar estudio MIDI.',
+                'En Configuración de Audio y MIDI → Dispositivos de audio, selecciona el iPhone y pulsa Activar (IDAM).',
           ),
           const _Step(
             number: '3',
             text:
-                'Doble clic en Red → activa la sesión y marca "Dispositivo está en línea".',
+                'Abre Ventana → Mostrar estudio MIDI. Debe aparecer un dispositivo "iPhone". Los canales 1 y 2 de la ventana de audio no son MIDI.',
           ),
           const _Step(
             number: '4',
             text:
-                'Conecta tu iPhone/iPad desde Directorio. En MainStage, elige esa entrada MIDI.',
+                'En MainStage, elige la entrada MIDI "iPhone" (o "Sliderz" en red) y usa Learn.',
+          ),
+          const SizedBox(height: 12),
+          Text(
+            'Opción B — Wi‑Fi (red)',
+            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.labelBright,
+                  letterSpacing: 0.6,
+                ),
+          ),
+          const SizedBox(height: 8),
+          const _Step(
+            number: '1',
+            text:
+                'Mac e iPhone en la misma red Wi‑Fi. Activa MIDI por red arriba.',
+          ),
+          const _Step(
+            number: '2',
+            text:
+                'En el Mac: estudio MIDI → doble clic en Red → sesión en línea.',
+          ),
+          const _Step(
+            number: '3',
+            text:
+                'Conecta el iPhone desde Directorio. En MainStage, elige esa entrada MIDI.',
           ),
         ],
       ),
