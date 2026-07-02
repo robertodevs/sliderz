@@ -15,16 +15,12 @@ class MidiService extends ChangeNotifier {
   bool _connecting = false;
   String? _error;
   int _channel = 0;
-  bool _networkSupported = false;
-  bool _networkEnabled = false;
   StreamSubscription<MidiSetupChange>? _setupSubscription;
 
   bool get isReady => _ready;
   bool get isConnecting => _connecting;
   String? get error => _error;
   int get channel => _channel;
-  bool get networkSupported => _networkSupported;
-  bool get networkEnabled => _networkEnabled;
   MidiDevice? get outputDevice => _outputDevice;
   bool get isOutputConnected => _outputDevice?.connected ?? false;
 
@@ -34,26 +30,29 @@ class MidiService extends ChangeNotifier {
       _devices.where(_canSendTo).toList(growable: false);
 
   String get connectionStatusLabel {
-    if (_connecting) return 'Conectando MIDI...';
+    if (_connecting) return 'Conectando USB...';
     if (isOutputConnected) {
-      return 'MIDI → ${_outputDevice!.name}';
+      return 'USB → ${_outputDevice!.name}';
     }
     if (outboundDevices.isEmpty) {
-      return 'MIDI sin destinos';
+      return 'Sin dispositivo USB';
     }
-    return 'MIDI sin conexión';
+    return 'USB sin conexión';
+  }
+
+  String get connectionDetailLabel {
+    if (_connecting) return 'Buscando destino MIDI por cable';
+    if (isOutputConnected) return 'MIDI activo por USB';
+    if (outboundDevices.isEmpty) {
+      return 'Conecta el iPhone al Mac y activa IDAM';
+    }
+    return 'Abre ajustes y elige un destino USB';
   }
 
   Future<void> _initialize() async {
     try {
       _midi.configureBleTransport(null);
-      await _probeNetworkSupport();
-
-      if (_networkSupported && !_networkEnabled) {
-        await setNetworkEnabled(true);
-      } else {
-        _applyTransportPolicy();
-      }
+      _applyTransportPolicy();
 
       _setupSubscription = _midi.onMidiSetupChanged?.listen((_) {
         unawaited(_onSetupChanged());
@@ -115,13 +114,6 @@ class MidiService extends ChangeNotifier {
   }
 
   MidiDevice _pickPreferredDevice(List<MidiDevice> candidates) {
-    if (_networkEnabled) {
-      final networkDevices = candidates
-          .where((device) => device.type == MidiDeviceType.network)
-          .toList();
-      if (networkDevices.isNotEmpty) return networkDevices.first;
-    }
-
     final usbDevices = candidates
         .where((device) => device.type == MidiDeviceType.serial)
         .toList();
@@ -139,7 +131,8 @@ class MidiService extends ChangeNotifier {
 
     final current = _outputDevice;
     if (current != null && candidates.any((device) => device.id == current.id)) {
-      final refreshed = candidates.firstWhere((device) => device.id == current.id);
+      final refreshed =
+          candidates.firstWhere((device) => device.id == current.id);
       _outputDevice = refreshed;
       if (!refreshed.connected) {
         await _connectDevice(refreshed);
@@ -193,59 +186,16 @@ class MidiService extends ChangeNotifier {
     }
   }
 
-  Future<void> _probeNetworkSupport() async {
-    _midi.configureTransportPolicy(
-      const MidiTransportPolicy(excludedTransports: {MidiTransport.ble}),
-    );
-    try {
-      final enabled = await _midi.isNetworkSessionEnabled;
-      _networkSupported = true;
-      _networkEnabled = enabled ?? false;
-    } on StateError {
-      _networkSupported = false;
-      _networkEnabled = false;
-    }
-  }
-
   void setChannel(int channel) {
     _channel = channel.clamp(0, 15);
     notifyListeners();
   }
 
-  Future<void> setNetworkEnabled(bool enabled) async {
-    if (!_networkSupported || _networkEnabled == enabled) return;
-
-    _error = null;
-
-    if (!enabled) {
-      _midi.setNetworkSessionEnabled(false);
-    }
-
-    _networkEnabled = enabled;
-    _applyTransportPolicy();
-
-    if (enabled) {
-      try {
-        _midi.setNetworkSessionEnabled(true);
-      } catch (e) {
-        _networkEnabled = false;
-        _error = e.toString();
-        _applyTransportPolicy();
-      }
-    }
-
-    await _refreshDevices();
-    await _autoConnectOutputDevice();
-    notifyListeners();
-  }
-
   void _applyTransportPolicy() {
-    final excludedTransports = <MidiTransport>{MidiTransport.ble};
-    if (!_networkEnabled) {
-      excludedTransports.add(MidiTransport.network);
-    }
     _midi.configureTransportPolicy(
-      MidiTransportPolicy(excludedTransports: excludedTransports),
+      const MidiTransportPolicy(
+        excludedTransports: {MidiTransport.ble, MidiTransport.network},
+      ),
     );
   }
 
@@ -282,11 +232,6 @@ class MidiService extends ChangeNotifier {
   @override
   void dispose() {
     _setupSubscription?.cancel();
-    if (_networkEnabled) {
-      try {
-        _midi.setNetworkSessionEnabled(false);
-      } catch (_) {}
-    }
     _midi.dispose();
     super.dispose();
   }

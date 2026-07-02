@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'package:sliderz/controller/components/network_midi_sheet.dart';
+import 'package:sliderz/controller/components/midi_connection_sheet.dart';
 import 'package:sliderz/midi/services/midi_service.dart';
 import 'package:sliderz/theme/app_theme.dart';
 
@@ -33,12 +33,14 @@ class _StatusIndicators extends StatelessWidget {
   Widget build(BuildContext context) {
     final ready = midiService.isReady;
     final connected = midiService.isOutputConnected;
+    final detail = midiService.connectionDetailLabel;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
         _StatusLine(
+          icon: Icons.usb,
           color: connected
               ? AppColors.success
               : ready
@@ -46,16 +48,11 @@ class _StatusIndicators extends StatelessWidget {
                   : const Color(0xFFEF4444),
           label: midiService.connectionStatusLabel,
         ),
-        if (midiService.networkSupported) ...[
-          const SizedBox(height: 2),
-          _StatusLine(
-            icon: midiService.networkEnabled ? Icons.wifi : Icons.wifi_off,
-            color: midiService.networkEnabled ? AppColors.success : AppColors.label,
-            label: midiService.networkEnabled
-                ? 'MIDI por red activo'
-                : 'MIDI por red desactivado',
-          ),
-        ],
+        const SizedBox(height: 2),
+        _StatusLine(
+          color: connected ? AppColors.success : AppColors.label,
+          label: detail,
+        ),
       ],
     );
   }
@@ -136,7 +133,7 @@ class _StatusActions extends StatelessWidget {
         const SizedBox(width: 6),
         _IconChip(
           icon: Icons.settings_outlined,
-          onTap: () => NetworkMidiSheet.show(context, midiService),
+          onTap: () => MidiConnectionSheet.show(context, midiService),
         ),
       ],
     );

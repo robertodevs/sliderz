@@ -1,6 +1,6 @@
 # Sliderz
 
-A Flutter MIDI controller for iPhone and iPad, inspired by the KORG nanoKONTROL2. Control faders, knobs, transport, and channel buttons from your iOS device — including over Wi‑Fi to a Mac running MainStage or another DAW.
+A Flutter MIDI controller for iPhone and iPad, inspired by the KORG nanoKONTROL2. Control faders, knobs, transport, and channel buttons from your iOS device over **USB** to a Mac, DAW, or any MIDI-compatible app.
 
 ![Sliderz UI](assets/screenshot.png)
 
@@ -8,8 +8,7 @@ A Flutter MIDI controller for iPhone and iPad, inspired by the KORG nanoKONTROL2
 
 - **8 color-coded channel strips** — fader, pan knob, and Solo / Mute / Record buttons per channel
 - **Transport panel** — track navigation, markers, cycle, and playback controls
-- **MIDI virtual port** — appears as **"Sliderz"** on the same device for local apps
-- **Network MIDI (Wi‑Fi)** — send MIDI to a Mac over RTP-MIDI (no bridge app required)
+- **USB MIDI** — send MIDI to a Mac over cable (IDAM / CoreMIDI)
 - **nanoKONTROL2 CC mapping** — default control change assignments for DAW compatibility
 - **Landscape-first UI** — dark neumorphic design optimized for performance use
 
@@ -17,7 +16,7 @@ A Flutter MIDI controller for iPhone and iPad, inspired by the KORG nanoKONTROL2
 
 - Flutter SDK `^3.11.5`
 - iOS 13.1+ (primary target)
-- Mac and iOS device on the **same Wi‑Fi network** for MainStage / DAW control
+- iPhone or iPad connected to a Mac by **USB** for DAW or MIDI app control
 
 ## Getting started
 
@@ -34,15 +33,15 @@ For a clean install after icon or native changes:
 flutter clean && flutter pub get && flutter run
 ```
 
-## Connect to MainStage on Mac
+## Connect to a Mac (USB)
 
-1. On iPhone/iPad: open Sliderz → tap the **settings** icon → enable **MIDI por red (Wi‑Fi)**.
-2. On Mac: open **Audio MIDI Setup** → **Window → Show MIDI Studio**.
-3. Double-click **Network** → enable the session and check **Device is online**.
-4. Connect your iOS device from the **Directory** list.
-5. In **MainStage**: select the network MIDI input and use **Learn** to map controls.
+1. Connect iPhone/iPad to the Mac with a USB cable and tap **Trust** on the device.
+2. On Mac: **Audio MIDI Setup** → **Window → Show MIDI Studio**.
+3. Open **Audio Devices**, select the iPhone, and click **Enable** (IDAM).
+4. In Sliderz, tap the **settings** icon and select the **iPhone** USB destination.
+5. In your **DAW or MIDI app**, choose the **iPhone** MIDI input and map the controls.
 
-Move a fader or knob in Sliderz and confirm MIDI arrives before mapping in MainStage.
+Move a fader or knob in Sliderz and confirm MIDI arrives in your host app before mapping.
 
 ## MIDI CC mapping
 
@@ -95,7 +94,7 @@ dart run flutter_launcher_icons
 ## Tech stack
 
 - [Flutter](https://flutter.dev)
-- [flutter_midi_command](https://pub.dev/packages/flutter_midi_command) — CoreMIDI / virtual MIDI / network session on iOS
+- [flutter_midi_command](https://pub.dev/packages/flutter_midi_command) — CoreMIDI over USB on iOS
 
 ## License
 

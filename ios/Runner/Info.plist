@@ -69,12 +69,6 @@
 		<array>
 			<string>audio</string>
 		</array>
-		<key>NSLocalNetworkUsageDescription</key>
-		<string>Sliderz usa la red local para enviar MIDI a tu Mac.</string>
-		<key>NSBonjourServices</key>
-		<array>
-			<string>_apple-midi._udp</string>
-		</array>
 		<key>UIStatusBarHidden</key>
 		<true/>
 		<key>UIViewControllerBasedStatusBarAppearance</key>

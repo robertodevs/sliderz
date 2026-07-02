@@ -4,8 +4,8 @@ import 'package:flutter_midi_command/flutter_midi_command.dart';
 import 'package:sliderz/midi/services/midi_service.dart';
 import 'package:sliderz/theme/app_theme.dart';
 
-class NetworkMidiSheet extends StatelessWidget {
-  const NetworkMidiSheet({super.key, required this.midiService});
+class MidiConnectionSheet extends StatelessWidget {
+  const MidiConnectionSheet({super.key, required this.midiService});
 
   final MidiService midiService;
 
@@ -17,7 +17,7 @@ class NetworkMidiSheet extends StatelessWidget {
       context: context,
       backgroundColor: AppColors.panel,
       isScrollControlled: true,
-      builder: (context) => NetworkMidiSheet(midiService: midiService),
+      builder: (context) => MidiConnectionSheet(midiService: midiService),
     );
   }
 
@@ -50,10 +50,10 @@ class NetworkMidiSheet extends StatelessWidget {
                   ),
                   Row(
                     children: [
-                      const Icon(Icons.cable, color: AppColors.accent),
+                      const Icon(Icons.usb, color: AppColors.accent),
                       const SizedBox(width: 8),
                       Text(
-                        'Conexión con MainStage',
+                        'Conexión USB',
                         style:
                             Theme.of(context).textTheme.titleSmall?.copyWith(
                                   color: AppColors.labelBright,
@@ -61,6 +61,12 @@ class NetworkMidiSheet extends StatelessWidget {
                                 ),
                       ),
                     ],
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Sliderz envía MIDI al Mac por cable USB. '
+                    'Funciona con cualquier DAW o app que reciba MIDI.',
+                    style: Theme.of(context).textTheme.labelSmall,
                   ),
                   const SizedBox(height: 12),
                   _DeviceSection(midiService: midiService),
@@ -74,34 +80,6 @@ class NetworkMidiSheet extends StatelessWidget {
                           ?.copyWith(color: const Color(0xFFEF4444)),
                     ),
                   ],
-                  const SizedBox(height: 12),
-                  if (midiService.networkSupported)
-                    SwitchListTile(
-                      contentPadding: EdgeInsets.zero,
-                      title: const Text(
-                        'MIDI por red (Wi‑Fi)',
-                        style: TextStyle(
-                          color: AppColors.labelBright,
-                          fontSize: 14,
-                        ),
-                      ),
-                      subtitle: Text(
-                        midiService.networkEnabled
-                            ? 'Activo — útil si no usas USB o como respaldo'
-                            : 'Desactivado — USB puede seguir funcionando',
-                        style: Theme.of(context).textTheme.labelSmall,
-                      ),
-                      value: midiService.networkEnabled,
-                      activeThumbColor: AppColors.accent,
-                      onChanged: (enabled) =>
-                          midiService.setNetworkEnabled(enabled),
-                    )
-                  else
-                    Text(
-                      'MIDI por red no está disponible en esta plataforma. '
-                      'Puedes usar USB.',
-                      style: Theme.of(context).textTheme.labelSmall,
-                    ),
                   const SizedBox(height: 12),
                   const _SetupSteps(),
                 ],
@@ -134,7 +112,7 @@ class _DeviceSection extends StatelessWidget {
             children: [
               Expanded(
                 child: Text(
-                  'Destino MIDI',
+                  'Destino MIDI USB',
                   style: Theme.of(context).textTheme.labelSmall?.copyWith(
                         fontWeight: FontWeight.w700,
                         color: AppColors.labelBright,
@@ -158,8 +136,8 @@ class _DeviceSection extends StatelessWidget {
           const SizedBox(height: 8),
           if (outbound.isEmpty)
             Text(
-              'No hay destinos MIDI con salida. Conecta USB o activa MIDI por red '
-              'y pulsa Actualizar.',
+              'No hay destinos USB visibles. Conecta el iPhone al Mac, '
+              'activa IDAM y pulsa Actualizar.',
               style: Theme.of(context).textTheme.labelSmall,
             )
           else
@@ -235,8 +213,6 @@ class _DeviceSection extends StatelessWidget {
 
   IconData _iconForType(MidiDeviceType type) {
     switch (type) {
-      case MidiDeviceType.network:
-        return Icons.wifi;
       case MidiDeviceType.serial:
         return Icons.usb;
       case MidiDeviceType.ble:
@@ -248,16 +224,16 @@ class _DeviceSection extends StatelessWidget {
 
   String _typeLabel(MidiDeviceType type) {
     switch (type) {
-      case MidiDeviceType.network:
-        return 'Red (Wi‑Fi)';
       case MidiDeviceType.serial:
-        return 'USB / nativo';
-      case MidiDeviceType.ble:
-        return 'Bluetooth';
+        return 'USB';
       case MidiDeviceType.virtual:
         return 'Virtual';
       case MidiDeviceType.ownVirtual:
         return 'Virtual propio';
+      case MidiDeviceType.ble:
+        return 'Bluetooth';
+      case MidiDeviceType.network:
+        return 'Red';
       case MidiDeviceType.unknown:
         return 'Desconocido';
     }
@@ -276,7 +252,7 @@ class _SetupSteps extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Opción A — USB (recomendado)',
+            'Configuración USB',
             style: Theme.of(context).textTheme.labelSmall?.copyWith(
                   fontWeight: FontWeight.w700,
                   color: AppColors.labelBright,
@@ -292,42 +268,20 @@ class _SetupSteps extends StatelessWidget {
           const _Step(
             number: '2',
             text:
-                'En Configuración de Audio y MIDI → Dispositivos de audio, selecciona el iPhone y pulsa Activar (IDAM).',
+                'En Configuración de Audio y MIDI → Dispositivos de audio, '
+                'selecciona el iPhone y pulsa Activar (IDAM).',
           ),
           const _Step(
             number: '3',
             text:
-                'Abre Ventana → Mostrar estudio MIDI. Debe aparecer un dispositivo "iPhone". Los canales 1 y 2 de la ventana de audio no son MIDI.',
+                'Abre Ventana → Mostrar estudio MIDI. Debe aparecer '
+                '"iPhone" como destino MIDI.',
           ),
           const _Step(
             number: '4',
             text:
-                'En MainStage, elige la entrada MIDI "iPhone" (o "Sliderz" en red) y usa Learn.',
-          ),
-          const SizedBox(height: 12),
-          Text(
-            'Opción B — Wi‑Fi (red)',
-            style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.labelBright,
-                  letterSpacing: 0.6,
-                ),
-          ),
-          const SizedBox(height: 8),
-          const _Step(
-            number: '1',
-            text:
-                'Mac e iPhone en la misma red Wi‑Fi. Activa MIDI por red arriba.',
-          ),
-          const _Step(
-            number: '2',
-            text:
-                'En el Mac: estudio MIDI → doble clic en Red → sesión en línea.',
-          ),
-          const _Step(
-            number: '3',
-            text:
-                'Conecta el iPhone desde Directorio. En MainStage, elige esa entrada MIDI.',
+                'En Sliderz, elige ese destino arriba. En tu DAW o app MIDI, '
+                'selecciona la entrada "iPhone" y asigna los controles.',
           ),
         ],
       ),
