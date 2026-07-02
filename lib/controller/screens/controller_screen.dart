@@ -58,49 +58,47 @@ class _ControllerScreenState extends State<ControllerScreen> {
                 ],
               ),
             ),
-            child: SafeArea(
-              child: Column(
-                children: [
-                  StatusBar(midiService: _midiService),
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.fromLTRB(10, 4, 10, 10),
-                      child: LayoutBuilder(
-                        builder: (context, constraints) {
-                          const transportGap = 10.0;
-                          final channelsAreaWidth = constraints.maxWidth -
-                              AppTouch.transportPanelWidth -
-                              transportGap;
-                          final compact = channelsAreaWidth <
-                              AppTouch.channelStripMinWidth *
-                                  _controllerBloc.channels.length;
-                          return Row(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              TransportPanel(
-                                onTransport:
-                                    _controllerBloc.sendTransportMomentary,
-                              ),
-                              const SizedBox(width: 10),
-                              Expanded(
-                                child: compact
-                                    ? SingleChildScrollView(
-                                        scrollDirection: Axis.horizontal,
-                                        child: SizedBox(
-                                          width: _channelRowWidth(),
-                                          child: _buildChannelRow(compact: true),
-                                        ),
-                                      )
-                                    : _buildChannelRow(compact: false),
-                              ),
-                            ],
-                          );
-                        },
-                      ),
+            child: Column(
+              children: [
+                StatusBar(midiService: _midiService),
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(10, 4, 10, 10),
+                    child: LayoutBuilder(
+                      builder: (context, constraints) {
+                        const transportGap = 10.0;
+                        final channelsAreaWidth = constraints.maxWidth -
+                            AppTouch.transportPanelWidth -
+                            transportGap;
+                        final compact = channelsAreaWidth <
+                            AppTouch.channelStripMinWidth *
+                                _controllerBloc.channels.length;
+                        return Row(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            TransportPanel(
+                              onTransport:
+                                  _controllerBloc.sendTransportMomentary,
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: compact
+                                  ? SingleChildScrollView(
+                                      scrollDirection: Axis.horizontal,
+                                      child: SizedBox(
+                                        width: _channelRowWidth(),
+                                        child: _buildChannelRow(compact: true),
+                                      ),
+                                    )
+                                  : _buildChannelRow(compact: false),
+                            ),
+                          ],
+                        );
+                      },
                     ),
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
         );
