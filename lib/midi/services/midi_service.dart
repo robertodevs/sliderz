@@ -93,6 +93,14 @@ class MidiService extends ChangeNotifier {
   void sendCc(int cc, int value) {
     if (!_ready) return;
     final clamped = value.clamp(0, 127);
+    if (kDebugMode) {
+      debugPrint(
+        'MIDI → CC ch=${_channel + 1} cc=$cc value=$clamped '
+        '[0x${(0xB0 + _channel).toRadixString(16).toUpperCase()} '
+        '${cc.toRadixString(16).padLeft(2, '0').toUpperCase()} '
+        '${clamped.toRadixString(16).padLeft(2, '0').toUpperCase()}]',
+      );
+    }
     final data = Uint8List.fromList([0xB0 + _channel, cc, clamped]);
     _midi.sendData(data);
   }

@@ -10,22 +10,16 @@ class ChannelHandlers {
   const ChannelHandlers({
     required this.onFaderChanged,
     required this.onKnobChanged,
-    required this.onSoloPressed,
-    required this.onSoloReleased,
-    required this.onMutePressed,
-    required this.onMuteReleased,
-    required this.onRecordPressed,
-    required this.onRecordReleased,
+    required this.onSoloToggle,
+    required this.onMuteToggle,
+    required this.onRecordToggle,
   });
 
   final void Function(int index, double value) onFaderChanged;
   final void Function(int index, double value) onKnobChanged;
-  final void Function(int index) onSoloPressed;
-  final void Function(int index) onSoloReleased;
-  final void Function(int index) onMutePressed;
-  final void Function(int index) onMuteReleased;
-  final void Function(int index) onRecordPressed;
-  final void Function(int index) onRecordReleased;
+  final void Function(int index) onSoloToggle;
+  final void Function(int index) onMuteToggle;
+  final void Function(int index) onRecordToggle;
 }
 
 class ChannelStrip extends StatelessWidget {
@@ -44,82 +38,82 @@ class ChannelStrip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Expanded(
-      child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 3),
-        padding: const EdgeInsets.fromLTRB(6, 10, 6, 8),
-        decoration: neumorphicDecoration(
-          color: AppColors.panel,
-          radius: 14,
-          borderColor: _color.withValues(alpha: 0.2),
-        ),
-        child: Column(
-          children: [
-            MidiKnob(
-              value: state.knobValue,
-              accentColor: _color,
-              onChanged: (value) => handlers.onKnobChanged(index, value),
-            ),
-            const SizedBox(height: 10),
-            Expanded(
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Column(
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 2),
+      padding: const EdgeInsets.fromLTRB(4, 8, 4, 6),
+      decoration: neumorphicDecoration(
+        color: AppColors.panel,
+        radius: 14,
+        borderColor: _color.withValues(alpha: 0.2),
+      ),
+      child: Column(
+        children: [
+          MidiKnob(
+            value: state.knobValue,
+            size: AppTouch.knobSize,
+            accentColor: _color,
+            onChanged: (value) => handlers.onKnobChanged(index, value),
+          ),
+          const SizedBox(height: 8),
+          Expanded(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                SizedBox(
+                  width: AppTouch.minTarget,
+                  child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       MidiButton(
                         label: 'S',
+                        momentary: false,
                         active: state.soloActive,
                         accentColor: _color,
-                        size: 24,
-                        onPressed: () => handlers.onSoloPressed(index),
-                        onReleased: () => handlers.onSoloReleased(index),
+                        onTap: () => handlers.onSoloToggle(index),
                       ),
-                      const SizedBox(height: 6),
+                      const SizedBox(height: 4),
                       MidiButton(
                         label: 'M',
+                        momentary: false,
                         active: state.muteActive,
                         accentColor: _color,
-                        size: 24,
-                        onPressed: () => handlers.onMutePressed(index),
-                        onReleased: () => handlers.onMuteReleased(index),
+                        onTap: () => handlers.onMuteToggle(index),
                       ),
-                      const SizedBox(height: 6),
+                      const SizedBox(height: 4),
                       MidiButton(
                         label: 'R',
+                        momentary: false,
                         active: state.recordActive,
                         accentColor: _color,
-                        size: 24,
-                        onPressed: () => handlers.onRecordPressed(index),
-                        onReleased: () => handlers.onRecordReleased(index),
+                        onTap: () => handlers.onRecordToggle(index),
                       ),
                     ],
                   ),
-                  const SizedBox(width: 2),
-                  Expanded(
-                    child: MidiFader(
-                      value: state.faderValue,
-                      accentColor: _color,
-                      onChanged: (value) =>
-                          handlers.onFaderChanged(index, value),
-                    ),
+                ),
+                SizedBox(
+                  width: AppTouch.faderLaneWidth,
+                  child: MidiFader(
+                    value: state.faderValue,
+                    accentColor: _color,
+                    onChanged: (value) =>
+                        handlers.onFaderChanged(index, value),
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
-            const SizedBox(height: 6),
-            Text(
-              '${index + 1}',
-              style: TextStyle(
-                color: _color,
-                fontSize: 22,
-                fontWeight: FontWeight.w800,
-                height: 1,
-              ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            '${index + 1}',
+            style: TextStyle(
+              color: _color,
+              fontSize: 20,
+              fontWeight: FontWeight.w800,
+              height: 1,
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

@@ -8,15 +8,15 @@ class MidiFader extends StatelessWidget {
     required this.value,
     required this.onChanged,
     required this.accentColor,
-    this.width = 36,
     this.height = 120,
   });
 
   final double value;
   final ValueChanged<double> onChanged;
   final Color accentColor;
-  final double width;
   final double height;
+
+  static const double laneWidth = AppTouch.faderLaneWidth;
 
   @override
   Widget build(BuildContext context) {
@@ -24,97 +24,115 @@ class MidiFader extends StatelessWidget {
       builder: (context, constraints) {
         final h =
             constraints.maxHeight.isFinite ? constraints.maxHeight : height;
-        final capHeight = h * 0.11;
-        final travel = h - capHeight;
+        final capHeight = AppTouch.faderCapHeight;
+        final travel = (h - capHeight).clamp(1.0, double.infinity);
         final top = (1 - value) * travel;
-        final fillHeight = h - top - capHeight / 2;
+        final fillHeight = (h - top - capHeight / 2).clamp(0.0, h);
+        final touchWidth = constraints.maxWidth.isFinite
+            ? constraints.maxWidth
+            : laneWidth;
+        final contentWidth = touchWidth < laneWidth ? touchWidth : laneWidth;
+
+        void updateFromDy(double localY) {
+          onChanged((1 - (localY - capHeight / 2) / travel).clamp(0.0, 1.0));
+        }
 
         return GestureDetector(
-          onVerticalDragUpdate: (details) {
-            final localY = details.localPosition.dy - capHeight / 2;
-            onChanged((1 - localY / travel).clamp(0.0, 1.0));
-          },
-          onTapDown: (details) {
-            final localY = details.localPosition.dy - capHeight / 2;
-            onChanged((1 - localY / travel).clamp(0.0, 1.0));
-          },
+          behavior: HitTestBehavior.opaque,
+          onVerticalDragUpdate: (details) => updateFromDy(details.localPosition.dy),
+          onTapDown: (details) => updateFromDy(details.localPosition.dy),
           child: SizedBox(
-            width: width + 18,
+            width: touchWidth,
             height: h,
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                _FaderScale(height: h, accentColor: accentColor),
-                const SizedBox(width: 4),
-                Expanded(
-                  child: Stack(
-                    alignment: Alignment.topCenter,
-                    children: [
-                      Container(
-                        width: 3,
-                        height: h,
-                        decoration: BoxDecoration(
-                          color: AppColors.border.withValues(alpha: 0.5),
-                          borderRadius: BorderRadius.circular(2),
-                        ),
-                      ),
-                      Positioned(
-                        bottom: 0,
-                        child: Container(
-                          width: 3,
-                          height: fillHeight.clamp(0, h),
-                          decoration: BoxDecoration(
-                            color: accentColor,
-                            borderRadius: BorderRadius.circular(2),
-                            boxShadow: [
-                              BoxShadow(
-                                color: AppColors.glow(accentColor, 0.7),
-                                blurRadius: 8,
-                                spreadRadius: 1,
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      Positioned(
-                        top: top,
-                        child: Container(
-                          width: width,
-                          height: capHeight,
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF1E2836),
-                            borderRadius: BorderRadius.circular(6),
-                            border: Border.all(
-                              color: accentColor.withValues(alpha: 0.6),
-                            ),
-                            boxShadow: [
-                              BoxShadow(
-                                color: AppColors.glow(accentColor, 0.35),
-                                blurRadius: 6,
-                              ),
-                              const BoxShadow(
-                                color: Color(0x88000000),
-                                blurRadius: 4,
-                                offset: Offset(0, 2),
-                              ),
-                            ],
-                          ),
-                          child: Center(
+            child: Center(
+              child: SizedBox(
+                width: contentWidth,
+                height: h,
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    if (contentWidth >= laneWidth)
+                      _FaderScale(height: h, accentColor: accentColor),
+                    if (contentWidth >= laneWidth) const SizedBox(width: 8),
+                    Expanded(
+                      child: Stack(
+                        alignment: Alignment.topCenter,
+                        clipBehavior: Clip.none,
+                        children: [
+                          Align(
+                            alignment: Alignment.center,
                             child: Container(
-                              width: width * 0.55,
-                              height: 2,
+                              width: AppTouch.faderTrackWidth,
+                              height: h,
+                              decoration: BoxDecoration(
+                                color: AppColors.border.withValues(alpha: 0.5),
+                                borderRadius: BorderRadius.circular(3),
+                              ),
+                            ),
+                          ),
+                          Positioned(
+                            bottom: 0,
+                            left: (AppTouch.faderCapWidth -
+                                    AppTouch.faderTrackWidth) /
+                                2,
+                            child: Container(
+                              width: AppTouch.faderTrackWidth,
+                              height: fillHeight,
                               decoration: BoxDecoration(
                                 color: accentColor,
-                                borderRadius: BorderRadius.circular(1),
+                                borderRadius: BorderRadius.circular(3),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: AppColors.glow(accentColor, 0.7),
+                                    blurRadius: 8,
+                                    spreadRadius: 1,
+                                  ),
+                                ],
                               ),
                             ),
                           ),
-                        ),
+                          Positioned(
+                            top: top,
+                            child: Container(
+                              width: AppTouch.faderCapWidth,
+                              height: capHeight,
+                              decoration: BoxDecoration(
+                                color: const Color(0xFF1E2836),
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(
+                                  color: accentColor.withValues(alpha: 0.7),
+                                  width: 1.5,
+                                ),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: AppColors.glow(accentColor, 0.35),
+                                    blurRadius: 6,
+                                  ),
+                                  const BoxShadow(
+                                    color: Color(0x88000000),
+                                    blurRadius: 4,
+                                    offset: Offset(0, 2),
+                                  ),
+                                ],
+                              ),
+                              child: Center(
+                                child: Container(
+                                  width: AppTouch.faderCapWidth * 0.5,
+                                  height: 2.5,
+                                  decoration: BoxDecoration(
+                                    color: accentColor,
+                                    borderRadius: BorderRadius.circular(1),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
-              ],
+              ),
             ),
           ),
         );
@@ -133,7 +151,7 @@ class _FaderScale extends StatelessWidget {
   Widget build(BuildContext context) {
     const labels = ['100', '50', '0'];
     return SizedBox(
-      width: 14,
+      width: AppTouch.faderScaleWidth,
       height: height,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -142,8 +160,8 @@ class _FaderScale extends StatelessWidget {
               (label) => Text(
                 label,
                 style: TextStyle(
-                  color: accentColor.withValues(alpha: 0.7),
-                  fontSize: 7,
+                  color: accentColor.withValues(alpha: 0.75),
+                  fontSize: 8,
                   fontWeight: FontWeight.w600,
                 ),
               ),

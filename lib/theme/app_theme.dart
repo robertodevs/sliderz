@@ -30,6 +30,23 @@ class AppColors {
       color.withValues(alpha: opacity);
 }
 
+/// Minimum touch targets and fixed control dimensions (Apple HIG: 44pt).
+class AppTouch {
+  static const double minTarget = 44;
+  static const double channelButton = 40;
+  static const double transportButton = 44;
+  static const double knobSize = 46;
+  static const double faderCapWidth = 44;
+  static const double faderCapHeight = 34;
+  static const double faderTrackWidth = 5;
+  static const double faderScaleWidth = 18;
+  static const double faderLaneWidth =
+      faderScaleWidth + 8 + faderCapWidth;
+  static const double channelStripMinWidth =
+      minTarget + faderLaneWidth + 16;
+  static const double transportPanelWidth = 164;
+}
+
 ThemeData buildAppTheme() {
   return ThemeData(
     brightness: Brightness.dark,

@@ -29,12 +29,9 @@ class _ControllerScreenState extends State<ControllerScreen> {
     _channelHandlers = ChannelHandlers(
       onFaderChanged: _controllerBloc.setFader,
       onKnobChanged: _controllerBloc.setKnob,
-      onSoloPressed: _controllerBloc.pressSolo,
-      onSoloReleased: _controllerBloc.releaseSolo,
-      onMutePressed: _controllerBloc.pressMute,
-      onMuteReleased: _controllerBloc.releaseMute,
-      onRecordPressed: _controllerBloc.pressRecord,
-      onRecordReleased: _controllerBloc.releaseRecord,
+      onSoloToggle: _controllerBloc.toggleSolo,
+      onMuteToggle: _controllerBloc.toggleMute,
+      onRecordToggle: _controllerBloc.toggleRecord,
     );
   }
 
@@ -70,7 +67,13 @@ class _ControllerScreenState extends State<ControllerScreen> {
                       padding: const EdgeInsets.fromLTRB(10, 4, 10, 10),
                       child: LayoutBuilder(
                         builder: (context, constraints) {
-                          final compact = constraints.maxWidth < 720;
+                          const transportGap = 10.0;
+                          final channelsAreaWidth = constraints.maxWidth -
+                              AppTouch.transportPanelWidth -
+                              transportGap;
+                          final compact = channelsAreaWidth <
+                              AppTouch.channelStripMinWidth *
+                                  _controllerBloc.channels.length;
                           return Row(
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
@@ -84,11 +87,11 @@ class _ControllerScreenState extends State<ControllerScreen> {
                                     ? SingleChildScrollView(
                                         scrollDirection: Axis.horizontal,
                                         child: SizedBox(
-                                          width: 680,
-                                          child: _buildChannelRow(),
+                                          width: _channelRowWidth(),
+                                          child: _buildChannelRow(compact: true),
                                         ),
                                       )
-                                    : _buildChannelRow(),
+                                    : _buildChannelRow(compact: false),
                               ),
                             ],
                           );
@@ -105,17 +108,29 @@ class _ControllerScreenState extends State<ControllerScreen> {
     );
   }
 
-  Row _buildChannelRow() {
+  Row _buildChannelRow({required bool compact}) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: List.generate(
         _controllerBloc.channels.length,
-        (index) => ChannelStrip(
-          index: index,
-          state: _controllerBloc.channels[index],
-          handlers: _channelHandlers,
-        ),
+        (index) {
+          final strip = ChannelStrip(
+            index: index,
+            state: _controllerBloc.channels[index],
+            handlers: _channelHandlers,
+          );
+          if (compact) {
+            return SizedBox(
+              width: AppTouch.channelStripMinWidth,
+              child: strip,
+            );
+          }
+          return Expanded(child: strip);
+        },
       ),
     );
   }
+
+  double _channelRowWidth() =>
+      AppTouch.channelStripMinWidth * _controllerBloc.channels.length;
 }

@@ -29,34 +29,34 @@ class ControllerBloc extends ChangeNotifier {
     );
   }
 
-  void pressSolo(int index) {
-    _updateChannel(index, _channels[index].copyWith(soloActive: true));
-    _midiService.sendCcPress(NanoKontrol2Mapping.solo[index]);
+  void toggleSolo(int index) {
+    final active = !_channels[index].soloActive;
+    _updateChannel(index, _channels[index].copyWith(soloActive: active));
+    if (active) {
+      _midiService.sendCcPress(NanoKontrol2Mapping.solo[index]);
+    } else {
+      _midiService.sendCcRelease(NanoKontrol2Mapping.solo[index]);
+    }
   }
 
-  void releaseSolo(int index) {
-    _updateChannel(index, _channels[index].copyWith(soloActive: false));
-    _midiService.sendCcRelease(NanoKontrol2Mapping.solo[index]);
+  void toggleMute(int index) {
+    final active = !_channels[index].muteActive;
+    _updateChannel(index, _channels[index].copyWith(muteActive: active));
+    if (active) {
+      _midiService.sendCcPress(NanoKontrol2Mapping.mute[index]);
+    } else {
+      _midiService.sendCcRelease(NanoKontrol2Mapping.mute[index]);
+    }
   }
 
-  void pressMute(int index) {
-    _updateChannel(index, _channels[index].copyWith(muteActive: true));
-    _midiService.sendCcPress(NanoKontrol2Mapping.mute[index]);
-  }
-
-  void releaseMute(int index) {
-    _updateChannel(index, _channels[index].copyWith(muteActive: false));
-    _midiService.sendCcRelease(NanoKontrol2Mapping.mute[index]);
-  }
-
-  void pressRecord(int index) {
-    _updateChannel(index, _channels[index].copyWith(recordActive: true));
-    _midiService.sendCcPress(NanoKontrol2Mapping.record[index]);
-  }
-
-  void releaseRecord(int index) {
-    _updateChannel(index, _channels[index].copyWith(recordActive: false));
-    _midiService.sendCcRelease(NanoKontrol2Mapping.record[index]);
+  void toggleRecord(int index) {
+    final active = !_channels[index].recordActive;
+    _updateChannel(index, _channels[index].copyWith(recordActive: active));
+    if (active) {
+      _midiService.sendCcPress(NanoKontrol2Mapping.record[index]);
+    } else {
+      _midiService.sendCcRelease(NanoKontrol2Mapping.record[index]);
+    }
   }
 
   void sendTransportMomentary(int cc) {
