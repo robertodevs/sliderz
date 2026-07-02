@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
+import 'package:sliderz/common/utils/midi_haptics.dart';
 import 'package:sliderz/theme/app_theme.dart';
 
 class MidiKnob extends StatefulWidget {
@@ -25,25 +26,36 @@ class MidiKnob extends StatefulWidget {
 class _MidiKnobState extends State<MidiKnob> {
   double? _startValue;
   double? _startDy;
+  final ValueStepHaptics _haptics = ValueStepHaptics();
 
   void _handleDrag(DragUpdateDetails details) {
     final startValue = _startValue ?? widget.value;
     final startDy = _startDy ?? details.localPosition.dy;
     final delta = (startDy - details.localPosition.dy) / 120;
-    widget.onChanged((startValue + delta).clamp(0.0, 1.0));
+    final nextValue = (startValue + delta).clamp(0.0, 1.0);
+    _haptics.onValueChanged(nextValue);
+    widget.onChanged(nextValue);
   }
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onVerticalDragStart: (details) {
+        MidiHaptics.dragStart();
         _startValue = widget.value;
         _startDy = details.localPosition.dy;
+        _haptics.onValueChanged(widget.value);
       },
       onVerticalDragUpdate: _handleDrag,
       onVerticalDragEnd: (_) {
         _startValue = null;
         _startDy = null;
+        _haptics.reset();
+      },
+      onVerticalDragCancel: () {
+        _startValue = null;
+        _startDy = null;
+        _haptics.reset();
       },
       child: SizedBox(
         width: widget.size,

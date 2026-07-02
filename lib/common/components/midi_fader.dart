@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 
+import 'package:sliderz/common/utils/midi_haptics.dart';
 import 'package:sliderz/theme/app_theme.dart';
 
-class MidiFader extends StatelessWidget {
+class MidiFader extends StatefulWidget {
   const MidiFader({
     super.key,
     required this.value,
@@ -19,28 +20,61 @@ class MidiFader extends StatelessWidget {
   static const double laneWidth = AppTouch.faderLaneWidth;
 
   @override
+  State<MidiFader> createState() => _MidiFaderState();
+}
+
+class _MidiFaderState extends State<MidiFader> {
+  final ValueStepHaptics _haptics = ValueStepHaptics();
+
+  void _updateValue(double nextValue) {
+    _haptics.onValueChanged(nextValue);
+    widget.onChanged(nextValue);
+  }
+
+  void _beginInteraction() {
+    MidiHaptics.dragStart();
+    _haptics.onValueChanged(widget.value);
+  }
+
+  void _endInteraction() => _haptics.reset();
+
+  @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        final h =
-            constraints.maxHeight.isFinite ? constraints.maxHeight : height;
+        final h = constraints.maxHeight.isFinite
+            ? constraints.maxHeight
+            : widget.height;
         final capHeight = AppTouch.faderCapHeight;
         final travel = (h - capHeight).clamp(1.0, double.infinity);
-        final top = (1 - value) * travel;
+        final top = (1 - widget.value) * travel;
         final fillHeight = (h - top - capHeight / 2).clamp(0.0, h);
         final touchWidth = constraints.maxWidth.isFinite
             ? constraints.maxWidth
-            : laneWidth;
-        final contentWidth = touchWidth < laneWidth ? touchWidth : laneWidth;
+            : MidiFader.laneWidth;
+        final contentWidth = touchWidth < MidiFader.laneWidth
+            ? touchWidth
+            : MidiFader.laneWidth;
 
         void updateFromDy(double localY) {
-          onChanged((1 - (localY - capHeight / 2) / travel).clamp(0.0, 1.0));
+          _updateValue(
+            (1 - (localY - capHeight / 2) / travel).clamp(0.0, 1.0),
+          );
         }
 
         return GestureDetector(
           behavior: HitTestBehavior.opaque,
-          onVerticalDragUpdate: (details) => updateFromDy(details.localPosition.dy),
-          onTapDown: (details) => updateFromDy(details.localPosition.dy),
+          onVerticalDragStart: (_) => _beginInteraction(),
+          onVerticalDragUpdate: (details) =>
+              updateFromDy(details.localPosition.dy),
+          onVerticalDragEnd: (_) => _endInteraction(),
+          onVerticalDragCancel: _endInteraction,
+          onTapDown: (details) {
+            _beginInteraction();
+            updateFromDy(details.localPosition.dy);
+          },
+          onTapUp: (_) => _endInteraction(),
+          onTapCancel: _endInteraction,
           child: SizedBox(
             width: touchWidth,
             height: h,
@@ -51,9 +85,9 @@ class MidiFader extends StatelessWidget {
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    if (contentWidth >= laneWidth)
-                      _FaderScale(height: h, accentColor: accentColor),
-                    if (contentWidth >= laneWidth) const SizedBox(width: 8),
+                    if (contentWidth >= MidiFader.laneWidth)
+                      _FaderScale(height: h, accentColor: widget.accentColor),
+                    if (contentWidth >= MidiFader.laneWidth) const SizedBox(width: 8),
                     Expanded(
                       child: Stack(
                         alignment: Alignment.topCenter,
@@ -79,11 +113,14 @@ class MidiFader extends StatelessWidget {
                               width: AppTouch.faderTrackWidth,
                               height: fillHeight,
                               decoration: BoxDecoration(
-                                color: accentColor,
+                                color: widget.accentColor,
                                 borderRadius: BorderRadius.circular(3),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: AppColors.glow(accentColor, 0.7),
+                                    color: AppColors.glow(
+                                      widget.accentColor,
+                                      0.7,
+                                    ),
                                     blurRadius: 8,
                                     spreadRadius: 1,
                                   ),
@@ -100,12 +137,17 @@ class MidiFader extends StatelessWidget {
                                 color: const Color(0xFF1E2836),
                                 borderRadius: BorderRadius.circular(8),
                                 border: Border.all(
-                                  color: accentColor.withValues(alpha: 0.7),
+                                  color: widget.accentColor.withValues(
+                                    alpha: 0.7,
+                                  ),
                                   width: 1.5,
                                 ),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: AppColors.glow(accentColor, 0.35),
+                                    color: AppColors.glow(
+                                      widget.accentColor,
+                                      0.35,
+                                    ),
                                     blurRadius: 6,
                                   ),
                                   const BoxShadow(
@@ -120,7 +162,7 @@ class MidiFader extends StatelessWidget {
                                   width: AppTouch.faderCapWidth * 0.5,
                                   height: 2.5,
                                   decoration: BoxDecoration(
-                                    color: accentColor,
+                                    color: widget.accentColor,
                                     borderRadius: BorderRadius.circular(1),
                                   ),
                                 ),

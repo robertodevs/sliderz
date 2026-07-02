@@ -32,22 +32,26 @@ class _StatusIndicators extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ready = midiService.isReady;
-    final networkOn = midiService.networkEnabled;
+    final connected = midiService.isOutputConnected;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
         _StatusLine(
-          color: ready ? AppColors.success : const Color(0xFFEF4444),
-          label: ready ? 'MIDI local activo' : 'MIDI no disponible',
+          color: connected
+              ? AppColors.success
+              : ready
+                  ? const Color(0xFFEAB308)
+                  : const Color(0xFFEF4444),
+          label: midiService.connectionStatusLabel,
         ),
         if (midiService.networkSupported) ...[
           const SizedBox(height: 2),
           _StatusLine(
-            icon: networkOn ? Icons.wifi : Icons.wifi_off,
-            color: networkOn ? AppColors.success : AppColors.label,
-            label: networkOn
+            icon: midiService.networkEnabled ? Icons.wifi : Icons.wifi_off,
+            color: midiService.networkEnabled ? AppColors.success : AppColors.label,
+            label: midiService.networkEnabled
                 ? 'MIDI por red activo'
                 : 'MIDI por red desactivado',
           ),
