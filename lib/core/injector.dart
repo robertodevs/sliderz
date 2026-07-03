@@ -6,16 +6,35 @@ class Injector {
 
   static final Injector instance = Injector._();
 
-  late final MidiService midiService;
-  late final ControllerBloc controllerBloc;
+  MidiService? _midiService;
+  ControllerBloc? _controllerBloc;
 
-  void init() {
-    midiService = MidiService();
-    controllerBloc = ControllerBloc(midiService);
+  MidiService get midiService {
+    final service = _midiService;
+    if (service == null) {
+      throw StateError('Injector not initialized. Call init() first.');
+    }
+    return service;
+  }
+
+  ControllerBloc get controllerBloc {
+    final bloc = _controllerBloc;
+    if (bloc == null) {
+      throw StateError('Injector not initialized. Call init() first.');
+    }
+    return bloc;
+  }
+
+  void init({MidiService? midiService}) {
+    dispose();
+    _midiService = midiService ?? MidiService();
+    _controllerBloc = ControllerBloc(_midiService!);
   }
 
   void dispose() {
-    controllerBloc.dispose();
-    midiService.dispose();
+    _controllerBloc?.dispose();
+    _midiService?.dispose();
+    _controllerBloc = null;
+    _midiService = null;
   }
 }

@@ -4,11 +4,21 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_midi_command/flutter_midi_command.dart';
 
 class MidiService extends ChangeNotifier {
-  MidiService() {
-    unawaited(_initialize());
+  MidiService({bool usePlatform = true}) : _usePlatform = usePlatform {
+    if (_usePlatform) {
+      _midi = MidiCommand();
+      unawaited(_initialize());
+      return;
+    }
+    _ready = true;
   }
 
-  final MidiCommand _midi = MidiCommand();
+  @visibleForTesting
+  factory MidiService.testing() => MidiService(usePlatform: false);
+
+  final bool _usePlatform;
+  MidiCommand? _midi;
+  bool _disposed = false;
   final List<MidiDevice> _devices = [];
   MidiDevice? _outputDevice;
   bool _ready = false;
@@ -51,10 +61,10 @@ class MidiService extends ChangeNotifier {
 
   Future<void> _initialize() async {
     try {
-      _midi.configureBleTransport(null);
+      _midi!.configureBleTransport(null);
       _applyTransportPolicy();
 
-      _setupSubscription = _midi.onMidiSetupChanged?.listen((_) {
+      _setupSubscription = _midi!.onMidiSetupChanged?.listen((_) {
         unawaited(_onSetupChanged());
       });
 
@@ -66,23 +76,30 @@ class MidiService extends ChangeNotifier {
       _ready = false;
       _error = e.toString();
     }
-    notifyListeners();
+    if (_disposed) return;
+    _safeNotify();
+  }
+
+  void _safeNotify() {
+    if (!_disposed) notifyListeners();
   }
 
   Future<void> _onSetupChanged() async {
+    if (!_usePlatform) return;
     await _refreshDevices();
     await _autoConnectOutputDevice();
-    notifyListeners();
+    _safeNotify();
   }
 
   Future<void> refreshDevices() async {
+    if (!_usePlatform) return;
     await _refreshDevices();
     await _autoConnectOutputDevice();
-    notifyListeners();
+    _safeNotify();
   }
 
   Future<void> _refreshDevices() async {
-    final devices = await _midi.devices ?? const <MidiDevice>[];
+    final devices = await _midi!.devices ?? const <MidiDevice>[];
     _devices
       ..clear()
       ..addAll(devices);
@@ -144,9 +161,10 @@ class MidiService extends ChangeNotifier {
   }
 
   Future<void> selectOutputDevice(MidiDevice device) async {
+    if (!_usePlatform) return;
     if (!outboundDevices.any((candidate) => candidate.id == device.id)) {
       _error = 'El dispositivo "${device.name}" no admite envío MIDI.';
-      notifyListeners();
+      _safeNotify();
       return;
     }
 
@@ -154,7 +172,7 @@ class MidiService extends ChangeNotifier {
     if (previous != null &&
         previous.id != device.id &&
         previous.connected) {
-      _midi.disconnectDevice(previous);
+      _midi!.disconnectDevice(previous);
     }
 
     _outputDevice = device;
@@ -166,10 +184,10 @@ class MidiService extends ChangeNotifier {
 
     _connecting = true;
     _error = null;
-    notifyListeners();
+    _safeNotify();
 
     try {
-      await _midi.connectToDevice(device);
+      await _midi!.connectToDevice(device);
       if (kDebugMode) {
         debugPrint(
           'MIDI connected to "${device.name}" (${device.type.name})',
@@ -182,17 +200,17 @@ class MidiService extends ChangeNotifier {
       }
     } finally {
       _connecting = false;
-      notifyListeners();
+      _safeNotify();
     }
   }
 
   void setChannel(int channel) {
     _channel = channel.clamp(0, 15);
-    notifyListeners();
+    _safeNotify();
   }
 
   void _applyTransportPolicy() {
-    _midi.configureTransportPolicy(
+    _midi!.configureTransportPolicy(
       const MidiTransportPolicy(
         excludedTransports: {MidiTransport.ble, MidiTransport.network},
       ),
@@ -200,7 +218,7 @@ class MidiService extends ChangeNotifier {
   }
 
   void sendCc(int cc, int value) {
-    if (!_ready) return;
+    if (!_ready || !_usePlatform) return;
 
     final target = _outputDevice;
     if (target == null || !target.connected) {
@@ -222,7 +240,7 @@ class MidiService extends ChangeNotifier {
       );
     }
     final data = Uint8List.fromList([0xB0 + _channel, cc, clamped]);
-    _midi.sendData(data, deviceId: target.id);
+    _midi!.sendData(data, deviceId: target.id);
   }
 
   void sendCcPress(int cc) => sendCc(cc, 127);
@@ -231,8 +249,13 @@ class MidiService extends ChangeNotifier {
 
   @override
   void dispose() {
+    _disposed = true;
     _setupSubscription?.cancel();
-    _midi.dispose();
+    if (_usePlatform && _midi != null) {
+      try {
+        _midi!.dispose();
+      } catch (_) {}
+    }
     super.dispose();
   }
 }
