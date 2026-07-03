@@ -72,9 +72,18 @@ BoxDecoration neumorphicDecoration({
   Color? borderColor,
 }) {
   return BoxDecoration(
-    color: color,
+    gradient: LinearGradient(
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+      colors: [
+        _lighten(color, 0.06),
+        _darken(color, 0.08),
+      ],
+    ),
     borderRadius: BorderRadius.circular(radius),
-    border: Border.all(color: borderColor ?? AppColors.border.withValues(alpha: 0.6)),
+    border: _uniformBorder(
+      borderColor ?? AppColors.border.withValues(alpha: 0.6),
+    ),
     boxShadow: const [
       BoxShadow(
         color: Color(0x66000000),
@@ -84,8 +93,228 @@ BoxDecoration neumorphicDecoration({
       BoxShadow(
         color: Color(0x14FFFFFF),
         blurRadius: 2,
-        offset: Offset(0, -1),
+        offset: Offset(-1, -1),
       ),
     ],
   );
+}
+
+BoxDecoration controlButtonDecoration({
+  double radius = 8,
+  bool pressed = false,
+  bool active = false,
+  Color? accent,
+  bool glowWhenActive = true,
+}) {
+  if (pressed) return _pressedButtonDecoration(radius, accent);
+  if (active) {
+    return _activeButtonDecoration(
+      radius,
+      accent ?? AppColors.accent,
+      glowWhenActive,
+    );
+  }
+  return _raisedButtonDecoration(radius);
+}
+
+BoxDecoration faderTrackDecoration({double radius = 3}) {
+  return BoxDecoration(
+    gradient: const LinearGradient(
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+      colors: [Color(0xFF0A0E14), Color(0xFF1A2433)],
+    ),
+    borderRadius: BorderRadius.circular(radius),
+    border: _uniformBorder(Colors.black.withValues(alpha: 0.55)),
+    boxShadow: [
+      BoxShadow(
+        color: Colors.black.withValues(alpha: 0.55),
+        blurRadius: 3,
+        offset: const Offset(-1, -1),
+      ),
+      BoxShadow(
+        color: Colors.white.withValues(alpha: 0.05),
+        blurRadius: 2,
+        offset: const Offset(1, 1),
+      ),
+    ],
+  );
+}
+
+BoxDecoration faderFillDecoration({
+  required Color accent,
+  double radius = 3,
+}) {
+  return BoxDecoration(
+    gradient: LinearGradient(
+      begin: Alignment.topCenter,
+      end: Alignment.bottomCenter,
+      colors: [
+        accent.withValues(alpha: 0.95),
+        accent.withValues(alpha: 0.75),
+      ],
+    ),
+    borderRadius: BorderRadius.circular(radius),
+    boxShadow: [
+      BoxShadow(
+        color: AppColors.glow(accent, 0.65),
+        blurRadius: 10,
+        spreadRadius: 1,
+      ),
+    ],
+  );
+}
+
+BoxDecoration faderCapDecoration({
+  required Color accent,
+  bool pressed = false,
+  double radius = 8,
+}) {
+  if (pressed) {
+    return _pressedButtonDecoration(radius, accent);
+  }
+  return BoxDecoration(
+    gradient: const LinearGradient(
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+      colors: [Color(0xFF1E2836), Color(0xFF141C28)],
+    ),
+    borderRadius: BorderRadius.circular(radius),
+    border: _uniformBorder(accent.withValues(alpha: 0.35)),
+    boxShadow: const [
+      BoxShadow(
+        color: Color(0x66000000),
+        blurRadius: 8,
+        offset: Offset(3, 5),
+      ),
+      BoxShadow(
+        color: Color(0x18FFFFFF),
+        blurRadius: 4,
+        offset: Offset(-1, -1),
+      ),
+    ],
+  );
+}
+
+BoxDecoration faderCapGrooveDecoration({required Color accent}) {
+  return BoxDecoration(
+    gradient: LinearGradient(
+      begin: Alignment.topCenter,
+      end: Alignment.bottomCenter,
+      colors: [
+        Colors.black.withValues(alpha: 0.45),
+        Colors.black.withValues(alpha: 0.25),
+      ],
+    ),
+    borderRadius: BorderRadius.circular(2),
+    border: _uniformBorder(Colors.black.withValues(alpha: 0.35)),
+    boxShadow: [
+      BoxShadow(
+        color: Colors.black.withValues(alpha: 0.35),
+        blurRadius: 2,
+        offset: const Offset(0, 1),
+      ),
+    ],
+  );
+}
+
+BoxDecoration _raisedButtonDecoration(double radius) {
+  return BoxDecoration(
+    gradient: const LinearGradient(
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+      colors: [Color(0xFF1E2836), Color(0xFF141C28)],
+    ),
+    borderRadius: BorderRadius.circular(radius),
+    border: _uniformBorder(AppColors.border.withValues(alpha: 0.75)),
+    boxShadow: const [
+      BoxShadow(
+        color: Color(0x55000000),
+        blurRadius: 8,
+        offset: Offset(3, 4),
+      ),
+      BoxShadow(
+        color: Color(0x18FFFFFF),
+        blurRadius: 4,
+        offset: Offset(-1, -1),
+      ),
+    ],
+  );
+}
+
+BoxDecoration _pressedButtonDecoration(double radius, Color? accent) {
+  final tint = accent ?? AppColors.border;
+  return BoxDecoration(
+    gradient: LinearGradient(
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+      colors: [
+        _darken(const Color(0xFF141C28), 0.04),
+        Color.alphaBlend(tint.withValues(alpha: 0.12), const Color(0xFF1A2433)),
+      ],
+    ),
+    borderRadius: BorderRadius.circular(radius),
+    border: _uniformBorder(
+      Color.alphaBlend(tint.withValues(alpha: 0.2), AppColors.border),
+    ),
+    boxShadow: [
+      BoxShadow(
+        color: Colors.black.withValues(alpha: 0.45),
+        blurRadius: 4,
+        offset: const Offset(-1, -1),
+      ),
+      BoxShadow(
+        color: Colors.white.withValues(alpha: 0.04),
+        blurRadius: 3,
+        offset: const Offset(2, 2),
+      ),
+    ],
+  );
+}
+
+BoxDecoration _activeButtonDecoration(
+  double radius,
+  Color accent,
+  bool glow,
+) {
+  return BoxDecoration(
+    gradient: LinearGradient(
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+      colors: [
+        Color.alphaBlend(accent.withValues(alpha: 0.24), const Color(0xFF1E2836)),
+        Color.alphaBlend(accent.withValues(alpha: 0.12), const Color(0xFF141C28)),
+      ],
+    ),
+    borderRadius: BorderRadius.circular(radius),
+    border: _uniformBorder(accent.withValues(alpha: 0.45)),
+    boxShadow: [
+      if (glow)
+        BoxShadow(
+          color: AppColors.glow(accent, 0.35),
+          blurRadius: 12,
+          spreadRadius: 1,
+        ),
+      const BoxShadow(
+        color: Color(0x55000000),
+        blurRadius: 8,
+        offset: Offset(3, 4),
+      ),
+      const BoxShadow(
+        color: Color(0x14FFFFFF),
+        blurRadius: 3,
+        offset: Offset(-1, -1),
+      ),
+    ],
+  );
+}
+
+Border _uniformBorder(Color color) => Border.all(color: color, width: 1);
+
+Color _lighten(Color color, double amount) {
+  return Color.lerp(color, Colors.white, amount) ?? color;
+}
+
+Color _darken(Color color, double amount) {
+  return Color.lerp(color, Colors.black, amount) ?? color;
 }

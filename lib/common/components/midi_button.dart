@@ -42,6 +42,7 @@ class MidiButton extends StatefulWidget {
 
 class _MidiButtonState extends State<MidiButton> {
   static const _minPressDuration = Duration(milliseconds: 120);
+  static const _buttonRadius = 8.0;
 
   bool _pressed = false;
   DateTime? _pressStartedAt;
@@ -101,18 +102,10 @@ class _MidiButtonState extends State<MidiButton> {
     setState(() => _pressed = false);
   }
 
-  Color _backgroundColor(Color accent) {
-    if (widget.active) return accent.withValues(alpha: 0.28);
-    if (_pressed) return accent.withValues(alpha: 0.22);
-    return AppColors.panelElevated;
-  }
-
   @override
   Widget build(BuildContext context) {
     final accent = widget.accentColor ?? AppColors.accent;
     final lit = widget.active || _pressed;
-    final showGlow =
-        (widget.active && widget.glowWhenActive) || _pressed;
     final hitSize = widget.size < AppTouch.minTarget
         ? AppTouch.minTarget
         : widget.size;
@@ -136,7 +129,7 @@ class _MidiButtonState extends State<MidiButton> {
         onTapCancel: () => _pressCancel(invokeMomentaryRelease: true),
         child: Center(
           child: AnimatedScale(
-            scale: _pressed ? 0.92 : 1,
+            scale: _pressed ? 0.98 : 1,
             duration: releaseDuration,
             curve: Curves.easeOut,
             child: AnimatedContainer(
@@ -144,33 +137,12 @@ class _MidiButtonState extends State<MidiButton> {
               curve: Curves.easeOut,
               width: widget.size,
               height: widget.size,
-              decoration: BoxDecoration(
-                color: _backgroundColor(accent),
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(
-                  color: lit ? accent : AppColors.border,
-                  width: widget.active ? 2 : (lit ? 2 : 1),
-                ),
-                boxShadow: showGlow
-                    ? [
-                        BoxShadow(
-                          color: AppColors.glow(accent, _pressed ? 0.55 : 0.45),
-                          blurRadius: _pressed ? 14 : 12,
-                          spreadRadius: _pressed ? 2 : 1,
-                        ),
-                        const BoxShadow(
-                          color: Color(0x66000000),
-                          blurRadius: 6,
-                          offset: Offset(0, 3),
-                        ),
-                      ]
-                    : const [
-                        BoxShadow(
-                          color: Color(0x55000000),
-                          blurRadius: 6,
-                          offset: Offset(0, 3),
-                        ),
-                      ],
+              decoration: controlButtonDecoration(
+                radius: _buttonRadius,
+                pressed: _pressed,
+                active: widget.active,
+                accent: accent,
+                glowWhenActive: widget.glowWhenActive,
               ),
               child: widget.icon != null
                   ? Icon(

@@ -177,7 +177,7 @@ class _ActionChip extends StatelessWidget {
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
-        decoration: neumorphicDecoration(radius: 8),
+        decoration: controlButtonDecoration(radius: 8),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -211,7 +211,7 @@ class _IconChip extends StatelessWidget {
       child: Container(
         width: 30,
         height: 30,
-        decoration: neumorphicDecoration(radius: 8),
+        decoration: controlButtonDecoration(radius: 8),
         child: Icon(icon, size: 15, color: AppColors.label),
       ),
     );

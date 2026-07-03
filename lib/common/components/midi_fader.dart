@@ -25,6 +25,7 @@ class MidiFader extends StatefulWidget {
 
 class _MidiFaderState extends State<MidiFader> {
   final ValueStepHaptics _haptics = ValueStepHaptics();
+  bool _dragging = false;
 
   void _updateValue(double nextValue) {
     _haptics.onValueChanged(nextValue);
@@ -32,11 +33,15 @@ class _MidiFaderState extends State<MidiFader> {
   }
 
   void _beginInteraction() {
+    setState(() => _dragging = true);
     MidiHaptics.dragStart();
     _haptics.onValueChanged(widget.value);
   }
 
-  void _endInteraction() => _haptics.reset();
+  void _endInteraction() {
+    if (_dragging) setState(() => _dragging = false);
+    _haptics.reset();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -55,6 +60,8 @@ class _MidiFaderState extends State<MidiFader> {
         final contentWidth = touchWidth < MidiFader.laneWidth
             ? touchWidth
             : MidiFader.laneWidth;
+        final trackOffset =
+            (AppTouch.faderCapWidth - AppTouch.faderTrackWidth) / 2;
 
         void updateFromDy(double localY) {
           _updateValue(
@@ -87,7 +94,8 @@ class _MidiFaderState extends State<MidiFader> {
                   children: [
                     if (contentWidth >= MidiFader.laneWidth)
                       _FaderScale(height: h, accentColor: widget.accentColor),
-                    if (contentWidth >= MidiFader.laneWidth) const SizedBox(width: 8),
+                    if (contentWidth >= MidiFader.laneWidth)
+                      const SizedBox(width: 8),
                     Expanded(
                       child: Stack(
                         alignment: Alignment.topCenter,
@@ -98,75 +106,25 @@ class _MidiFaderState extends State<MidiFader> {
                             child: Container(
                               width: AppTouch.faderTrackWidth,
                               height: h,
-                              decoration: BoxDecoration(
-                                color: AppColors.border.withValues(alpha: 0.5),
-                                borderRadius: BorderRadius.circular(3),
-                              ),
+                              decoration: faderTrackDecoration(),
                             ),
                           ),
                           Positioned(
                             bottom: 0,
-                            left: (AppTouch.faderCapWidth -
-                                    AppTouch.faderTrackWidth) /
-                                2,
+                            left: trackOffset,
                             child: Container(
                               width: AppTouch.faderTrackWidth,
                               height: fillHeight,
-                              decoration: BoxDecoration(
-                                color: widget.accentColor,
-                                borderRadius: BorderRadius.circular(3),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: AppColors.glow(
-                                      widget.accentColor,
-                                      0.7,
-                                    ),
-                                    blurRadius: 8,
-                                    spreadRadius: 1,
-                                  ),
-                                ],
+                              decoration: faderFillDecoration(
+                                accent: widget.accentColor,
                               ),
                             ),
                           ),
                           Positioned(
                             top: top,
-                            child: Container(
-                              width: AppTouch.faderCapWidth,
-                              height: capHeight,
-                              decoration: BoxDecoration(
-                                color: const Color(0xFF1E2836),
-                                borderRadius: BorderRadius.circular(8),
-                                border: Border.all(
-                                  color: widget.accentColor.withValues(
-                                    alpha: 0.7,
-                                  ),
-                                  width: 1.5,
-                                ),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: AppColors.glow(
-                                      widget.accentColor,
-                                      0.35,
-                                    ),
-                                    blurRadius: 6,
-                                  ),
-                                  const BoxShadow(
-                                    color: Color(0x88000000),
-                                    blurRadius: 4,
-                                    offset: Offset(0, 2),
-                                  ),
-                                ],
-                              ),
-                              child: Center(
-                                child: Container(
-                                  width: AppTouch.faderCapWidth * 0.5,
-                                  height: 2.5,
-                                  decoration: BoxDecoration(
-                                    color: widget.accentColor,
-                                    borderRadius: BorderRadius.circular(1),
-                                  ),
-                                ),
-                              ),
+                            child: _FaderCap(
+                              accentColor: widget.accentColor,
+                              pressed: _dragging,
                             ),
                           ),
                         ],
@@ -179,6 +137,60 @@ class _MidiFaderState extends State<MidiFader> {
           ),
         );
       },
+    );
+  }
+}
+
+class _FaderCap extends StatelessWidget {
+  const _FaderCap({
+    required this.accentColor,
+    required this.pressed,
+  });
+
+  final Color accentColor;
+  final bool pressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final capWidth = AppTouch.faderCapWidth;
+    final capHeight = AppTouch.faderCapHeight;
+    final grooveWidth = capWidth * 0.56;
+    final grooveHeight = capHeight * 0.22;
+
+    return AnimatedContainer(
+      duration: pressed ? Duration.zero : const Duration(milliseconds: 100),
+      curve: Curves.easeOut,
+      width: capWidth,
+      height: capHeight,
+      decoration: faderCapDecoration(
+        accent: accentColor,
+        pressed: pressed,
+      ),
+      child: Center(
+        child: Container(
+          width: grooveWidth,
+          height: grooveHeight,
+          padding: const EdgeInsets.symmetric(vertical: 2),
+          decoration: faderCapGrooveDecoration(accent: accentColor),
+          child: Center(
+            child: Container(
+              width: grooveWidth * 0.72,
+              height: 2.5,
+              decoration: BoxDecoration(
+                color: accentColor,
+                borderRadius: BorderRadius.circular(1),
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColors.glow(accentColor, 0.8),
+                    blurRadius: 6,
+                    spreadRadius: 0.5,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }
