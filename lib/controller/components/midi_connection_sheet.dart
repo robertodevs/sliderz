@@ -9,10 +9,7 @@ class MidiConnectionSheet extends StatelessWidget {
 
   final MidiService midiService;
 
-  static Future<void> show(
-    BuildContext context,
-    MidiService midiService,
-  ) {
+  static Future<void> show(BuildContext context, MidiService midiService) {
     return showModalBottomSheet<void>(
       context: context,
       backgroundColor: AppColors.panel,
@@ -54,18 +51,17 @@ class MidiConnectionSheet extends StatelessWidget {
                       const SizedBox(width: 8),
                       Text(
                         'Conexión USB',
-                        style:
-                            Theme.of(context).textTheme.titleSmall?.copyWith(
-                                  color: AppColors.labelBright,
-                                  fontWeight: FontWeight.w700,
-                                ),
+                        style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                          color: AppColors.labelBright,
+                          fontWeight: FontWeight.w700,
+                        ),
                       ),
                     ],
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Sliderz envía MIDI al Mac por cable USB. '
-                    'Funciona con cualquier DAW o app que reciba MIDI.',
+                    'Sliderz envía MIDI por cable USB. Funciona con '
+                    'cualquier DAW, app o dispositivo que reciba MIDI.',
                     style: Theme.of(context).textTheme.labelSmall,
                   ),
                   const SizedBox(height: 12),
@@ -74,10 +70,9 @@ class MidiConnectionSheet extends StatelessWidget {
                     const SizedBox(height: 8),
                     Text(
                       midiService.error!,
-                      style: Theme.of(context)
-                          .textTheme
-                          .labelSmall
-                          ?.copyWith(color: const Color(0xFFEF4444)),
+                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                        color: const Color(0xFFEF4444),
+                      ),
                     ),
                   ],
                   const SizedBox(height: 12),
@@ -114,10 +109,10 @@ class _DeviceSection extends StatelessWidget {
                 child: Text(
                   'Destino MIDI USB',
                   style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.labelBright,
-                        letterSpacing: 0.6,
-                      ),
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.labelBright,
+                    letterSpacing: 0.6,
+                  ),
                 ),
               ),
               TextButton.icon(
@@ -136,8 +131,8 @@ class _DeviceSection extends StatelessWidget {
           const SizedBox(height: 8),
           if (outbound.isEmpty)
             Text(
-              'No hay destinos USB visibles. Conecta el iPhone al Mac, '
-              'activa IDAM y pulsa Actualizar.',
+              'No hay destinos USB visibles. Conecta un destino MIDI '
+              'compatible y pulsa Actualizar.',
               style: Theme.of(context).textTheme.labelSmall,
             )
           else
@@ -187,8 +182,7 @@ class _DeviceSection extends StatelessWidget {
                                 ),
                                 Text(
                                   _typeLabel(device.type),
-                                  style:
-                                      Theme.of(context).textTheme.labelSmall,
+                                  style: Theme.of(context).textTheme.labelSmall,
                                 ),
                               ],
                             ),
@@ -254,34 +248,33 @@ class _SetupSteps extends StatelessWidget {
           Text(
             'Configuración USB',
             style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.labelBright,
-                  letterSpacing: 0.6,
-                ),
+              fontWeight: FontWeight.w700,
+              color: AppColors.labelBright,
+              letterSpacing: 0.6,
+            ),
           ),
           const SizedBox(height: 8),
           const _Step(
             number: '1',
-            text:
-                'Conecta el iPhone al Mac por USB y pulsa Confiar en el iPhone.',
+            text: 'Conecta este dispositivo a un destino MIDI USB compatible.',
           ),
           const _Step(
             number: '2',
             text:
-                'En Configuración de Audio y MIDI → Dispositivos de audio, '
-                'selecciona el iPhone y pulsa Activar (IDAM).',
+                'En iPhone/Mac, activa IDAM si usas ese flujo. En Android, '
+                'usa USB OTG o una interfaz USB MIDI compatible.',
           ),
           const _Step(
             number: '3',
             text:
-                'Abre Ventana → Mostrar estudio MIDI. Debe aparecer '
-                '"iPhone" como destino MIDI.',
+                'Abre tu DAW o app MIDI y confirma que el destino aparece '
+                'como entrada MIDI disponible.',
           ),
           const _Step(
             number: '4',
             text:
                 'En Sliderz, elige ese destino arriba. En tu DAW o app MIDI, '
-                'selecciona la entrada "iPhone" y asigna los controles.',
+                'selecciona la entrada correspondiente y asigna los controles.',
           ),
         ],
       ),

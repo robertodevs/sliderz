@@ -54,7 +54,7 @@ class MidiService extends ChangeNotifier {
     if (_connecting) return 'Buscando destino MIDI por cable';
     if (isOutputConnected) return 'MIDI activo por USB';
     if (outboundDevices.isEmpty) {
-      return 'Conecta el iPhone al Mac y activa IDAM';
+      return 'Conecta un destino MIDI USB y pulsa Actualizar';
     }
     return 'Abre ajustes y elige un destino USB';
   }
@@ -127,6 +127,11 @@ class MidiService extends ChangeNotifier {
 
   bool _canSendTo(MidiDevice device) {
     if (device.type == MidiDeviceType.ownVirtual) return false;
+
+    if (defaultTargetPlatform == TargetPlatform.android) {
+      return device.inputPorts.isNotEmpty;
+    }
+
     return device.outputPorts.isNotEmpty;
   }
 
@@ -147,9 +152,11 @@ class MidiService extends ChangeNotifier {
     }
 
     final current = _outputDevice;
-    if (current != null && candidates.any((device) => device.id == current.id)) {
-      final refreshed =
-          candidates.firstWhere((device) => device.id == current.id);
+    if (current != null &&
+        candidates.any((device) => device.id == current.id)) {
+      final refreshed = candidates.firstWhere(
+        (device) => device.id == current.id,
+      );
       _outputDevice = refreshed;
       if (!refreshed.connected) {
         await _connectDevice(refreshed);
@@ -169,9 +176,7 @@ class MidiService extends ChangeNotifier {
     }
 
     final previous = _outputDevice;
-    if (previous != null &&
-        previous.id != device.id &&
-        previous.connected) {
+    if (previous != null && previous.id != device.id && previous.connected) {
       _midi!.disconnectDevice(previous);
     }
 
@@ -189,9 +194,7 @@ class MidiService extends ChangeNotifier {
     try {
       await _midi!.connectToDevice(device);
       if (kDebugMode) {
-        debugPrint(
-          'MIDI connected to "${device.name}" (${device.type.name})',
-        );
+        debugPrint('MIDI connected to "${device.name}" (${device.type.name})');
       }
     } catch (e) {
       _error = e.toString();
@@ -223,9 +226,7 @@ class MidiService extends ChangeNotifier {
     final target = _outputDevice;
     if (target == null || !target.connected) {
       if (kDebugMode) {
-        debugPrint(
-          'MIDI warning: no connected output device — CC not sent',
-        );
+        debugPrint('MIDI warning: no connected output device — CC not sent');
       }
       return;
     }

@@ -3,7 +3,6 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:sliderz/controller/components/transport_panel.dart';
 import 'package:sliderz/midi/models/nanokontrol2_mapping.dart';
-import 'package:sliderz/theme/app_theme.dart';
 
 import '../helpers/test_app.dart';
 
@@ -12,10 +11,7 @@ void main() {
     testWidgets('shows navigation section labels', (tester) async {
       await pumpControlWidget(
         tester,
-        SizedBox(
-          height: 320,
-          child: TransportPanel(onTransport: (_) {}),
-        ),
+        SizedBox(height: 320, child: TransportPanel(onTransport: (_) {})),
       );
 
       expect(find.text('TRACK'), findsOneWidget);
@@ -29,10 +25,7 @@ void main() {
 
       await pumpControlWidget(
         tester,
-        SizedBox(
-          height: 320,
-          child: TransportPanel(onTransport: sent.add),
-        ),
+        SizedBox(height: 320, child: TransportPanel(onTransport: sent.add)),
       );
 
       await tester.tap(find.text('SET'));
@@ -41,16 +34,14 @@ void main() {
       expect(sent, contains(NanoKontrol2Mapping.markerSet));
     });
 
-    testWidgets('play transport button sends play cc on press down',
-        (tester) async {
+    testWidgets('play transport button sends play cc on press down', (
+      tester,
+    ) async {
       final sent = <int>[];
 
       await pumpControlWidget(
         tester,
-        SizedBox(
-          height: 320,
-          child: TransportPanel(onTransport: sent.add),
-        ),
+        SizedBox(height: 320, child: TransportPanel(onTransport: sent.add)),
       );
 
       final gesture = await tester.startGesture(
@@ -64,16 +55,14 @@ void main() {
       await tester.pump();
     });
 
-    testWidgets('track navigation buttons send left and right cc',
-        (tester) async {
+    testWidgets('track navigation buttons send left and right cc', (
+      tester,
+    ) async {
       final sent = <int>[];
 
       await pumpControlWidget(
         tester,
-        SizedBox(
-          height: 320,
-          child: TransportPanel(onTransport: sent.add),
-        ),
+        SizedBox(height: 320, child: TransportPanel(onTransport: sent.add)),
       );
 
       await tester.tap(find.byIcon(Icons.chevron_left).first);
